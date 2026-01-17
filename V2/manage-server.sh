@@ -8,7 +8,7 @@ case "$1" in
     start)
         echo "Запуск MQTT + Vault сервера..."
         docker-compose up -d
-        sleep 5
+        sleep 20
         
         echo "Генерация SSL сертификатов..."
         docker-compose exec mosquitto sh -c "
