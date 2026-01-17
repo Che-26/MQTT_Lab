@@ -2,7 +2,7 @@
 
 set -e
 
-cd ~/mqtt-vault-server
+#cd ~/mqtt-vault-server
 
 case "$1" in
     start)
