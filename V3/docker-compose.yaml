@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    ports: ["2290:8883"]
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/passwd:/mosquitto/config/passwd
+      - ./mosquitto/certs:/mosquitto/config/certs
+    restart: unless-stopped
+    networks: [iot_net]
+
+  vault:
+    image: vault:1.15
+    ports: ["2291:8200"]
+    volumes:
+      - ./vault/vault.hcl:/vault/config/vault.hcl
+      - ./vault/tls:/vault/config/tls
+    cap_add: [IPC_LOCK]
+    environment: [VAULT_ADDR=https://0.0.0.0:8200]
+    entrypoint: ["sh", "-c", "vault server -config=/vault/config/vault.hcl"]
+    restart: unless-stopped
+    networks: [iot_net]
+
+  consumer:
+    build: ./consumer
+    depends_on: [mosquitto, vault]
+    environment: [VAULT_TOKEN=root]
+    volumes: [./consumer:/app]
+    working_dir: /app
+    command: python consumer.py
+    networks: [iot_net]
+
+networks:
+  iot_net:
+    driver: bridge
